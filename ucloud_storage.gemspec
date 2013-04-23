@@ -20,6 +20,6 @@ Gem::Specification.new do |gem|
   	s.add_development_dependency "vcr"
   	s.add_development_dependency "webmock"
 
-  	s.add_dependency "httparty"
+  	s.add_runtime_dependency "httparty"
 	end
 end
