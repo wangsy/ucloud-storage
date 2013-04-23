@@ -7,7 +7,7 @@ require 'yaml'
 
 describe UcloudStorage do
 	let(:valid_ucloud) do
-		ucloud = UcloudStorage.new
+		ucloud = UcloudStorage::UcloudStorage.new
 		file = File.open(File.join(File.dirname(__FILE__), "/support/auth_info.yml"))
 		auth_info = YAML.load(file)
 		ucloud.user = auth_info["valid_user"]["user"]
@@ -16,7 +16,7 @@ describe UcloudStorage do
 	end
 
 	let(:invalid_ucloud) do
-		invlaid_ucloud = UcloudStorage.new
+		invlaid_ucloud = UcloudStorage::UcloudStorage.new
 		invlaid_ucloud.user = "invalid_user@mintshop.com"
 		invlaid_ucloud.pass = "please download mintshop"
 		invlaid_ucloud
