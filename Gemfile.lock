@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    ucloud_storage (0.0.5)
+      httparty
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -26,7 +32,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  httparty
   rspec
+  ucloud_storage!
   vcr
   webmock
