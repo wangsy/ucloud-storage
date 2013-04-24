@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'httparty'
 
 module UcloudStorage
 	class TotalyWrongException < StandardError; end
