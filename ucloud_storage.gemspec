@@ -15,11 +15,11 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = UcloudStorage::VERSION
 
-  Gem::Specification.new do |s|
-  	s.add_development_dependency "rspec"
-  	s.add_development_dependency "vcr"
-  	s.add_development_dependency "webmock"
+	gem.add_development_dependency "rspec"
+	gem.add_development_dependency "vcr"
+	gem.add_development_dependency "webmock"
 
-  	s.add_runtime_dependency "httparty"
-	end
+	gem.add_dependency "httparty"
+
+	gem.rubyforge_project = "ucloudstorage"
 end
