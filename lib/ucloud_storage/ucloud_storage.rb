@@ -5,7 +5,7 @@ module UcloudStorage
 	class NotAuthorized < StandardError; end
 
 	class UcloudStorage
-		attr_accessor :user, :pass, :storage_url, :auth_token
+		attr_accessor :user, :pass, :storage_url, :auth_token, :code
 
 		def authorize
 			response = HTTParty.get("https://api.ucloudbiz.olleh.com/storage/v1/auth/", 
@@ -32,7 +32,8 @@ module UcloudStorage
 					"Content-Type" => contenttype,
 					"Content-Length" => file.size.to_s },
 				body: file.read)
-			case response.code
+			self.code = response.code
+			case self.code
 			when 201 then
 				true
 			else
