@@ -18,11 +18,28 @@ Or install it yourself as:
 
 ## Usage
 
-		ucloud = UcloudStorage.new
-		ucloud.user = "email"
-		ucloud.pass = "API KEY"
+		ucloud = UcloudStorage.new(user: 'email', pass: 'API_KEY')
+
 		ucloud.authoize
 		ucloud.upload(filepath, boxname, destination)
+
+## Configuration
+
+Set default user/pass info
+
+    UcloudStorage.configure do |config|
+      config.user = 'email'
+      config.pass = 'API KEY'
+    end
+
+## Response block
+
+Every request yields a response
+
+    ucloud.update(filepath, boxname, dest) do |response|
+      response_code = response.code
+    end
+
 
 ## Contributing
 
