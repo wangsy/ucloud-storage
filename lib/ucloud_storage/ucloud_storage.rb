@@ -8,9 +8,9 @@ module UcloudStorage
 	class UcloudStorage
 		attr_accessor :user, :pass, :storage_url, :auth_token
 
-		def initialize
-			@user = Configuration.user
-			@pass = Configuration.pass
+		def initialize(options={})
+			@user = options.fetch(:user) { Configuration.user }
+			@pass = options.fetch(:pass) { Configuration.pass }
 		end
 
 		def authorize

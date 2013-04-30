@@ -9,7 +9,7 @@ module UcloudStorage
     def_delegators Configuration, :user, :pass, :configure
   end
 
-	def self.new
-		UcloudStorage.new
+	def self.new(options={})
+		UcloudStorage.new(options)
 	end
 end

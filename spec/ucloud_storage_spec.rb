@@ -27,12 +27,10 @@ describe UcloudStorage do
 	end
 
 	let(:valid_ucloud) do
-		ucloud = UcloudStorage.new
 		file = File.open(File.join(File.dirname(__FILE__), "/support/auth_info.yml"))
 		auth_info = YAML.load(file)
-		ucloud.user = auth_info["valid_user"]["user"]
-		ucloud.pass = auth_info["valid_user"]["pass"]
-		ucloud
+		ucloud = UcloudStorage.new(user: auth_info["valid_user"]["user"],
+															 pass: auth_info["valid_user"]["pass"])
 	end
 
 	let(:invalid_ucloud) do
