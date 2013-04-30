@@ -36,9 +36,9 @@ Set default user/pass info
 
 Every request yields a response
 
-  ucloud.update(filepath, boxname, dest) do |response|
-    response_code = response.code
-  end
+    ucloud.update(filepath, boxname, dest) do |response|
+      response_code = response.code
+    end
 
 
 ## Contributing
