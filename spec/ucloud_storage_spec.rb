@@ -6,6 +6,26 @@ require 'support/vcr'
 require 'yaml'
 
 describe UcloudStorage do
+	context "set user/pass info" do
+		before do
+			UcloudStorage.configure do |config|
+				config.user = "abc@mintshop.com"
+				config.pass = "my_api_key"
+			end
+		end
+
+		it "can set default user/pass info" do
+			UcloudStorage.user.should == "abc@mintshop.com"
+			UcloudStorage.pass.should == "my_api_key"
+		end
+
+		it 'uses default uesr/pass info when initialized' do
+			ucloud = UcloudStorage.new
+			ucloud.user.should == "abc@mintshop.com"
+			ucloud.pass.should == "my_api_key"
+		end
+	end
+
 	let(:valid_ucloud) do
 		ucloud = UcloudStorage.new
 		file = File.open(File.join(File.dirname(__FILE__), "/support/auth_info.yml"))

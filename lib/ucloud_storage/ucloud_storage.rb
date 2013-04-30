@@ -8,6 +8,11 @@ module UcloudStorage
 	class UcloudStorage
 		attr_accessor :user, :pass, :storage_url, :auth_token
 
+		def initialize
+			@user = Configuration.user
+			@pass = Configuration.pass
+		end
+
 		def authorize
 			response = HTTParty.get("https://api.ucloudbiz.olleh.com/storage/v1/auth/",
 														 	headers: { "X-Storage-User" => user,
