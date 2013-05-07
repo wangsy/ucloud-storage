@@ -22,6 +22,7 @@ Or install it yourself as:
 
 		ucloud.authoize
 		ucloud.upload(filepath, boxname, destination)
+    ucloud.delte(boxname, destination)
 
 ## Configuration
 
@@ -36,7 +37,7 @@ Set default user/pass info
 
 Every request yields a response
 
-    ucloud.update(filepath, boxname, dest) do |response|
+    ucloud.upload(filepath, boxname, dest) do |response|
       response_code = response.code
     end
 
