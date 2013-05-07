@@ -121,4 +121,23 @@ describe UcloudStorage do
 			end
 		end
 	end
+
+	describe "#delete" do
+		it 'should delete updated object' do
+			valid_ucloud.authorize
+			file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+			box = 'dev_box'
+			destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+			VCR.use_cassette("v1/put_storage_object_02") do
+				valid_ucloud.upload(file_path, box, destination)
+			end
+
+			VCR.use_cassette("v1/delete_storage_object_02") do
+				valid_ucloud.delete(box, destination) do |response|
+					response.code.should == 204
+				end.should == true
+			end
+		end
+	end
 end
