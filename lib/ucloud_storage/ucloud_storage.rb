@@ -44,10 +44,18 @@ module UcloudStorage
 
 			yield response if block_given?
 
-			case response.code
-			when 201 then true
-			else false
-			end
+			response.code == 201 ? true : false
+		end
+
+		def delete(box_name, destination)
+			raise NotAuthorized if storage_url.nil?
+
+			response = HTTParty.delete(storage_url+ "/#{box_name}/#{destination}",
+																 headers: { "X-Auth-Token" => auth_token })
+
+			yield response if block_given?
+
+			response.code == 204 ? true : false
 		end
 	end
 end
