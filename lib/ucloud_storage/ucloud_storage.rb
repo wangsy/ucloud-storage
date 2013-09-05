@@ -62,5 +62,16 @@ module UcloudStorage
 
       response.code == 204 ? true : false
     end
+
+    def get(box_name, destination)
+      raise NotAuthorized if storage_url.nil?
+
+      response = HTTParty.get(storage_url+ "/#{box_name}/#{destination}",
+                                 headers: { "X-Auth-Token" => auth_token })
+
+      yield response if block_given?
+
+      [200, 304].include?(response.code) ? true : false
+    end
   end
 end
