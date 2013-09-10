@@ -11,6 +11,7 @@ module UcloudStorage
     def initialize(options={})
       @user = options.fetch(:user) { Configuration.user }
       @pass = options.fetch(:pass) { Configuration.pass }
+      @authorized = false
     end
 
     def authorize
@@ -24,10 +25,14 @@ module UcloudStorage
       when 200
         self.storage_url = response.headers["X-Storage-Url"]
         self.auth_token = response.headers["X-Auth-Token"]
-        true
+        @authorized = true
       when 401 then false
       else raise TotalyWrongException
       end
+    end
+
+    def is_authorized?
+      @authorized
     end
 
     def upload(file_path, box_name, destination, &block)
@@ -61,6 +66,17 @@ module UcloudStorage
       yield response if block_given?
 
       response.code == 204 ? true : false
+    end
+
+    def get(box_name, destination)
+      raise NotAuthorized if storage_url.nil?
+
+      response = HTTParty.get(storage_url+ "/#{box_name}/#{destination}",
+                                 headers: { "X-Auth-Token" => auth_token })
+
+      yield response if block_given?
+
+      [200, 304].include?(response.code) ? true : false
     end
   end
 end
