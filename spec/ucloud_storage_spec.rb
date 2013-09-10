@@ -43,9 +43,11 @@ describe UcloudStorage do
   describe '#authorize' do
     it "can authorize with valid user/pass" do
       VCR.use_cassette("storage/v1/auth") do
+        valid_ucloud.is_authorized?.should_not == true
         valid_ucloud.authorize.should == true
         valid_ucloud.storage_url.should_not be_nil
         valid_ucloud.auth_token.should_not be_nil
+        valid_ucloud.is_authorized?.should == true
       end
     end
 
