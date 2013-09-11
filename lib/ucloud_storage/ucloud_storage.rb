@@ -78,5 +78,14 @@ module UcloudStorage
 
       [200, 304].include?(response.code) ? true : false
     end
+
+    def exist?(box_name, destination)
+      raise NotAuthorized if storage_url.nil?
+
+      response = HTTParty.head(storage_url+ "/#{box_name}/#{destination}",
+                                 headers: { "X-Auth-Token" => auth_token })
+
+      [204].include?(response.code) ? true : false
+    end
   end
 end
