@@ -43,9 +43,11 @@ describe UcloudStorage do
   describe '#authorize' do
     it "can authorize with valid user/pass" do
       VCR.use_cassette("storage/v1/auth") do
+        valid_ucloud.is_authorized?.should_not == true
         valid_ucloud.authorize.should == true
         valid_ucloud.storage_url.should_not be_nil
         valid_ucloud.auth_token.should_not be_nil
+        valid_ucloud.is_authorized?.should == true
       end
     end
 
@@ -153,6 +155,25 @@ describe UcloudStorage do
       VCR.use_cassette("v1/delete_storage_object_02") do
         valid_ucloud.delete(box, destination) do |response|
           response.code.should == 204
+        end.should == true
+      end
+    end
+  end
+
+  describe "#exist" do
+    it 'should get updated object' do
+      valid_ucloud.authorize
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      box = 'dev_box'
+      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+      VCR.use_cassette("v1/put_storage_object_02") do
+        valid_ucloud.upload(file_path, box, destination)
+      end
+
+      VCR.use_cassette("v1/get_storage_object") do
+        valid_ucloud.get(box, destination) do |response|
+          [200, 304].should include(response.code)
         end.should == true
       end
     end
