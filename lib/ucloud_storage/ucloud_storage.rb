@@ -91,8 +91,8 @@ module UcloudStorage
 
       response = HTTParty.head(storage_url+ "/#{box_name}/#{destination}",
                                  headers: { "X-Auth-Token" => auth_token })
-
-      [204].include?(response.code) ? true : false
+      p response.code
+      [200, 204, 304].include?(response.code) ? true : false
     end
   end
 end
