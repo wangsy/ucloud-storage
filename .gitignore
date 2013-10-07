@@ -15,6 +15,6 @@ spec/reports
 test/tmp
 test/version_tmp
 tmp
-
 spec/fixtures/vcr_cassettes/*
 spec/support/auth_info.yml
+*.DS_Store

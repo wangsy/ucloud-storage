@@ -18,11 +18,15 @@ Or install it yourself as:
 
 ## Usage
 
-		ucloud = UcloudStorage.new(user: 'email', pass: 'API_KEY')
+    ucloud = UcloudStorage.new(user: 'email', pass: 'API_KEY')
 
-		ucloud.authoize
-		ucloud.upload(filepath, boxname, destination)
-    ucloud.delte(boxname, destination)
+    ucloud.authoize
+    # Upload
+    ucloud.upload(filepath, boxname, destination)
+    # Delete
+    ucloud.delete(boxname, destination)
+    # Get
+    ucloud.get(boxname, destination)
 
 ## Configuration
 

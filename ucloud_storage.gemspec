@@ -5,7 +5,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Sooyong Wang", "Kunha Park"]
   gem.email         = ["wangsy@wangsy.com", "potato9@gmail.com"]
   gem.description   = %q{ucloud storage API}
-  gem.summary       = %q{simple API for authorize, upload files}
+  gem.summary       = %q{simple API for authorize, upload/delete files}
   gem.homepage      = "https://github.com/wangsy/ucloud-storage"
 
   gem.files         = `git ls-files`.split($\)
