@@ -39,10 +39,8 @@ module UcloudStorage
       raise NotAuthorized if storage_url.nil?
 
       file = File.new(file_path)
-      content_type = `file --mime-type #{file_path}`.split(": ").last
-
+      content_type = get_image_extension(file_path)
       upload_blob(file.read, box_name, destination, content_type, &block)
-
     end
 
     def upload_blob(blob, box_name, destination, content_type, &block)
@@ -91,8 +89,35 @@ module UcloudStorage
 
       response = HTTParty.head(storage_url+ "/#{box_name}/#{destination}",
                                  headers: { "X-Auth-Token" => auth_token })
-      
+
       [200, 204].include?(response.code) ? true : false # Adding 200 for Ucloud's way
     end
+
+    private
+
+    private
+
+    #  stolen from http://stackoverflow.com/a/16636012/1802026
+    def get_image_extension(local_file_path)
+      png = Regexp.new("\x89PNG".force_encoding("binary"))
+      jpg = Regexp.new("\xff\xd8\xff\xe0\x00\x10JFIF".force_encoding("binary"))
+      jpg2 = Regexp.new("\xff\xd8\xff\xe1(.*){2}Exif".force_encoding("binary"))
+      case IO.read(local_file_path, 10)
+      when /^GIF8/
+        'gif'
+      when /^#{png}/
+        'png'
+      when /^#{jpg}/
+        'jpg'
+      when /^#{jpg2}/
+        'jpg'
+      else
+        nil
+        # mime_type = `file #{local_file_path} --mime-type`.gsub("\n", '') # Works on linux and mac
+        # raise UnprocessableEntity, "unknown file type" if !mime_type
+        # mime_type.split(':')[1].split('/')[1].gsub('x-', '').gsub(/jpeg/, 'jpg').gsub(/text/, 'txt').gsub(/x-/, '')
+      end
+    end
+
   end
 end
