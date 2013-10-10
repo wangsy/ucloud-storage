@@ -79,10 +79,10 @@ module UcloudStorage
       response = HTTParty.get(storage_url+ "/#{box_name}/#{destination}",
                                  headers: { "X-Auth-Token" => auth_token })
 
-      yield response if block_given?
+      # yield response if block_given?
 
       # [200, 304].include?(response.code) ? true : false
-      # response
+      response
     end
 
     def exist?(box_name, destination)
