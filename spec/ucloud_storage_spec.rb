@@ -41,7 +41,7 @@ describe UcloudStorage do
   end
 
   describe '#authorize' do
-    it "can authorize with valid user/pass" do
+    xit "can authorize with valid user/pass" do
       VCR.use_cassette("storage/v1/auth") do
         valid_ucloud.is_authorized?.should_not == true
         valid_ucloud.authorize.should == true
@@ -51,7 +51,7 @@ describe UcloudStorage do
       end
     end
 
-    it "cannot authorize with invalid user/pass" do
+    xit "cannot authorize with invalid user/pass" do
       VCR.use_cassette("storage/v1/auth_fail") do
         invalid_ucloud.authorize.should == false
         invalid_ucloud.storage_url.should be_nil
@@ -59,7 +59,7 @@ describe UcloudStorage do
       end
     end
 
-    it 'yields response' do
+    xit 'yields response' do
       VCR.use_cassette("storage/v1/auth") do
         valid_ucloud.authorize do |response|
           response.code.should == 200
@@ -69,7 +69,7 @@ describe UcloudStorage do
   end
 
   describe "#upload" do
-    it "can upload a file" do
+    xit "can upload a file" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
@@ -83,7 +83,7 @@ describe UcloudStorage do
       end
     end
 
-    it "should fail to upload with invalid file path" do
+    xit "should fail to upload with invalid file path" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
@@ -97,7 +97,7 @@ describe UcloudStorage do
       }.to raise_error(Errno::ENOENT)
     end
 
-    it "should fail to upload without authorization" do
+    xit "should fail to upload without authorization" do
       file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
       box = 'dev'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
@@ -107,7 +107,7 @@ describe UcloudStorage do
       }.to raise_error(UcloudStorage::NotAuthorized)
     end
 
-    it "should retry to upload if authorization failure response" do
+    xit "should retry to upload if authorization failure response" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
@@ -124,7 +124,7 @@ describe UcloudStorage do
       end
     end
 
-    it 'yields response' do
+    xit 'yields response' do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
@@ -142,7 +142,7 @@ describe UcloudStorage do
   end
 
   describe "#delete" do
-    it 'should delete updated object' do
+    xit 'should delete updated object' do
       valid_ucloud.authorize
       file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
       box = 'dev_box'
@@ -161,7 +161,7 @@ describe UcloudStorage do
   end
 
   describe "#exist" do
-    it 'should get updated object' do
+    xit 'should get updated object' do
       valid_ucloud.authorize
       file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
       box = 'dev_box'
@@ -177,5 +177,24 @@ describe UcloudStorage do
         end.should == true
       end
     end
+
+  describe "#get" do
+    it 'should get count' do
+      valid_ucloud.authorize
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      box = 'dev_box'
+      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+      VCR.use_cassette("v1/put_storage_object_02") do
+        valid_ucloud.upload(file_path, box, destination)
+      end
+
+      VCR.use_cassette("v1/get_storage_object") do
+
+        valid_ucloud.get(box, destination).should == ""
+        end
+      end
+    end
   end
+
 end
