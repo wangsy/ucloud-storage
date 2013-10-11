@@ -73,15 +73,11 @@ module UcloudStorage
       response.code == 204 ? true : false
     end
 
-    def get(box_name, destination)
+    def get(box_name, destination, limit=100)
       raise NotAuthorized if storage_url.nil?
 
-      response = HTTParty.get(storage_url+ "/#{box_name}/#{destination}",
+      HTTParty.get(storage_url+ "/#{box_name}?limit=#{limit}&format=json&marker=#{destination}",
                                  headers: { "X-Auth-Token" => auth_token })
-
-      yield response if block_given?
-
-      [200, 304].include?(response.code) ? true : false
     end
 
     def exist?(box_name, destination)

@@ -18,3 +18,4 @@ tmp
 spec/fixtures/vcr_cassettes/*
 spec/support/auth_info.yml
 *.DS_Store
+auth_info.yml
