@@ -2,7 +2,7 @@
 require_relative '../lib/ucloud_storage'
 require 'httparty'
 require 'vcr'
-# require 'support/vcr'
+require 'support/vcr'
 require 'yaml'
 
 describe UcloudStorage do
@@ -41,7 +41,7 @@ describe UcloudStorage do
   end
 
   describe '#authorize' do
-    xit "can authorize with valid user/pass" do
+    it "can authorize with valid user/pass" do
       VCR.use_cassette("storage/v1/auth") do
         valid_ucloud.is_authorized?.should_not == true
         valid_ucloud.authorize.should == true
@@ -51,7 +51,7 @@ describe UcloudStorage do
       end
     end
 
-    xit "cannot authorize with invalid user/pass" do
+    it "cannot authorize with invalid user/pass" do
       VCR.use_cassette("storage/v1/auth_fail") do
         invalid_ucloud.authorize.should == false
         invalid_ucloud.storage_url.should be_nil
@@ -59,7 +59,7 @@ describe UcloudStorage do
       end
     end
 
-    xit 'yields response' do
+    it 'yields response' do
       VCR.use_cassette("storage/v1/auth") do
         valid_ucloud.authorize do |response|
           response.code.should == 200
@@ -69,12 +69,12 @@ describe UcloudStorage do
   end
 
   describe "#upload" do
-    xit "can upload a file" do
+    it "can upload a file" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
 
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
       box = 'dev'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
@@ -83,12 +83,12 @@ describe UcloudStorage do
       end
     end
 
-    xit "should fail to upload with invalid file path" do
+    it "should fail to upload with invalid file path" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
 
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/no_sample_file.txt")
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/no_sample_file.png")
       box = 'dev'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
@@ -97,8 +97,8 @@ describe UcloudStorage do
       }.to raise_error(Errno::ENOENT)
     end
 
-    xit "should fail to upload without authorization" do
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+    it "should fail to upload without authorization" do
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
       box = 'dev'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
@@ -107,12 +107,12 @@ describe UcloudStorage do
       }.to raise_error(UcloudStorage::NotAuthorized)
     end
 
-    xit "should retry to upload if authorization failure response" do
+    it "should retry to upload if authorization failure response" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
 
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
       box = 'dev'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
       valid_ucloud.auth_token += "a"
@@ -124,12 +124,12 @@ describe UcloudStorage do
       end
     end
 
-    xit 'yields response' do
+    it 'yields response' do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
       end
 
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
       box = 'dev'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
@@ -141,29 +141,15 @@ describe UcloudStorage do
     end
   end
 
-  describe "#delete" do
-    xit 'should delete updated object' do
-      valid_ucloud.authorize
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
-      VCR.use_cassette("v1/put_storage_object_02") do
-        valid_ucloud.upload(file_path, box, destination)
-      end
-
-      VCR.use_cassette("v1/delete_storage_object_02") do
-        valid_ucloud.delete(box, destination) do |response|
-          response.code.should == 204
-        end.should == true
-      end
-    end
-  end
+  
 
   describe "#exist" do
-    xit 'should get updated object' do
-      valid_ucloud.authorize
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+    it 'should exists updated object' do
+      VCR.use_cassette('storage/v1/auth') do
+        valid_ucloud.authorize
+      end
+
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
       box = 'dev_box'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
@@ -172,9 +158,7 @@ describe UcloudStorage do
       end
 
       VCR.use_cassette("v1/get_storage_object") do
-        valid_ucloud.get(box, destination) do |response|
-          [200, 304].should include(response.code)
-        end.should == true
+        valid_ucloud.exist?(box, destination).should == true
       end
     end
   end
@@ -195,6 +179,29 @@ describe UcloudStorage do
       VCR.use_cassette("v1/get_storage_object_02") do
         json = valid_ucloud.get(box, destination, 10)
         json.last['name'].should == 'cropped_images/sample_file2.png'
+      end
+    end
+  end
+
+  # 마지막에 테스트 하기
+  describe "#delete" do
+    it 'should delete updated object' do
+      VCR.use_cassette('storage/v1/auth') do
+        valid_ucloud.authorize
+      end
+
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
+      box = 'dev_box'
+      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+      VCR.use_cassette("v1/put_storage_object_02") do
+        valid_ucloud.upload(file_path, box, destination)
+      end
+
+      VCR.use_cassette("v1/delete_storage_object_02") do
+        valid_ucloud.delete(box, destination) do |response|
+          response.code.should == 204
+        end.should == true
       end
     end
   end
