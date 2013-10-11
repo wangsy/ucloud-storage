@@ -2,7 +2,7 @@
 require_relative '../lib/ucloud_storage'
 require 'httparty'
 require 'vcr'
-require 'support/vcr'
+# require 'support/vcr'
 require 'yaml'
 
 describe UcloudStorage do
@@ -177,6 +177,7 @@ describe UcloudStorage do
         end.should == true
       end
     end
+  end
 
   describe "#get" do
     it 'should get count' do
@@ -184,7 +185,7 @@ describe UcloudStorage do
       file_path1 = File.join(File.dirname(__FILE__), "/fixtures/sample_file1.png")
       file_path2 = File.join(File.dirname(__FILE__), "/fixtures/sample_file2.png")
       box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path1).basename.to_s
+      destination = 'cropped_images'
 
       VCR.use_cassette("v1/put_storage_object_03") do
         valid_ucloud.upload(file_path1, box, destination)
@@ -192,10 +193,8 @@ describe UcloudStorage do
       end
 
       VCR.use_cassette("v1/get_storage_object_02") do
-        valid_ucloud.get(box, destination) do |response|
-          # response.parsed_response.should == 0
-          # response
-        end
+        json = valid_ucloud.get(box, destination, 10)
+        json.last['name'].should == 'cropped_images/sample_file2.png'
       end
     end
   end
