@@ -81,7 +81,7 @@ module UcloudStorage
 
       yield response if block_given?
 
-      [200, 204].include?(response.code) ? true : false
+      [200, 304].include?(response.code) ? true : false
     end
 
     def exist?(box_name, destination)
