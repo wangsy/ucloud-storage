@@ -93,6 +93,13 @@ module UcloudStorage
       [200, 204].include?(response.code) ? true : false # Adding 200 for Ucloud's way
     end
 
+    def file_list(box_name, destination, limit=100)
+      raise NotAuthorized if storage_url.nil?
+
+      HTTParty.get(storage_url+ "/#{box_name}?limit=#{limit}&format=json&marker=#{destination}",
+                                 headers: { "X-Auth-Token" => auth_token })
+    end
+
     private
 
     private
