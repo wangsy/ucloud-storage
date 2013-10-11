@@ -156,9 +156,7 @@ describe UcloudStorage do
       end
 
       VCR.use_cassette("v1/get_storage_object") do
-        valid_ucloud.get(box, destination) do |response|
-          [200, 304].should include(response.code)
-        end.should == true
+        valid_ucloud.get(box, destination).should == true
       end
     end
   end
@@ -171,15 +169,16 @@ describe UcloudStorage do
 
       file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.png")
       box = 'dev_box'
-      destination = 'cropped_images'
+      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
       VCR.use_cassette("v1/put_storage_object_02") do
         valid_ucloud.upload(file_path, box, destination)
       end
 
-      VCR.use_cassette("v1/get_storage_object") do
-        json = valid_ucloud.get(box, destination, 10)
-        json.last['name'].should == 'cropped_images/sample_file1.png'
+      destination = 'cropped_images'
+      VCR.use_cassette("v1/get_storage_file_list") do
+        json = valid_ucloud.file_list(box, destination, 10)
+        json.last["name"].should == 'cropped_images/sample_file.png'
       end
     end
   end
