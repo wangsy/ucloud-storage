@@ -26,7 +26,7 @@ Or install it yourself as:
     # Delete
     ucloud.delete(boxname, destination)
     # Get
-    ucloud.get(boxname, destination)
+    ucloud.get(boxname, destination, limit=100)
 
 ## Configuration
 
