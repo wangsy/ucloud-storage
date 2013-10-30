@@ -167,7 +167,7 @@ describe UcloudStorage do
       box = 'dev_box'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
-      VCR.use_cassette("v1/put_storage_object_02") do
+      VCR.use_cassette("v1/put_storage_object_03") do
         valid_ucloud.upload(file_path, box, destination)
       end
 

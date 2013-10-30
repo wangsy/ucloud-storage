@@ -112,7 +112,11 @@ module UcloudStorage
       when /^#{jpg2}/
         'jpg'
       else
-        nil
+        if local_file_path.end_with? '.txt'
+          'text/plain'
+        else
+          'application/octet-stream'
+        end
         # mime_type = `file #{local_file_path} --mime-type`.gsub("\n", '') # Works on linux and mac
         # raise UnprocessableEntity, "unknown file type" if !mime_type
         # mime_type.split(':')[1].split('/')[1].gsub('x-', '').gsub(/jpeg/, 'jpg').gsub(/text/, 'txt').gsub(/x-/, '')
