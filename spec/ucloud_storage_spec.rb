@@ -196,6 +196,26 @@ describe UcloudStorage do
       end
 
       VCR.use_cassette("v1/get_storage_object") do
+        result = false
+        valid_ucloud.get(box, destination) do |response|
+          result = true
+          #[200, 304].should include(response.code)
+        end
+        result.should == true
+      end
+    end
+
+    it 'should get updated object' do
+      valid_ucloud.authorize
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      box = 'dev_box'
+      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+      VCR.use_cassette("v1/put_storage_object_03") do
+        valid_ucloud.upload(file_path, box, destination)
+      end
+
+      VCR.use_cassette("v1/get_storage_object") do
         valid_ucloud.get(box, destination) do |response|
           [200, 304].should include(response.code)
         end.should == true
