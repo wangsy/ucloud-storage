@@ -62,20 +62,20 @@ module UcloudStorage
       response.code == 201 ? true : false
     end
 
-    def delete(box_name, destination)
-      request(:delete, box_name, destination, [204])
+    def delete(box_name, destination, &block)
+      request(:delete, box_name, destination, [204], &block)
     end
 
-    def get(box_name, destination)
-      request(:get, box_name, destination, [200, 304])
+    def get(box_name, destination, &block)
+      request(:get, box_name, destination, [200, 304], &block)
     end
 
-    def exist?(box_name, destination)
-      request(:head, box_name, destination, [200, 204])
+    def exist?(box_name, destination, &block)
+      request(:head, box_name, destination, [200, 204], &block)
     end
 
     private
-    def request(method, box_name, destination, success_code = [200])
+    def request(method, box_name, destination, success_code = [200], &block)
       raise NotAuthorized if storage_url.nil?
 
       response = HTTParty.send(method, "#{storage_url}/#{box_name}/#{destination}", headers: { "X-Auth-Token" => auth_token })
