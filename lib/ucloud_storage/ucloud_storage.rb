@@ -63,39 +63,27 @@ module UcloudStorage
     end
 
     def delete(box_name, destination)
-      raise NotAuthorized if storage_url.nil?
-
-      response = HTTParty.delete(storage_url+ "/#{box_name}/#{destination}",
-                                 headers: { "X-Auth-Token" => auth_token })
-
-      yield response if block_given?
-
-      response.code == 204 ? true : false
+      request(:delete, box_name, destination, [204])
     end
 
     def get(box_name, destination)
-      raise NotAuthorized if storage_url.nil?
-
-      response = HTTParty.get(storage_url+ "/#{box_name}/#{destination}",
-                                 headers: { "X-Auth-Token" => auth_token })
-
-      yield response if block_given?
-
-      [200, 304].include?(response.code) ? true : false
+      request(:get, box_name, destination, [200, 304])
     end
 
     def exist?(box_name, destination)
-      raise NotAuthorized if storage_url.nil?
-
-      response = HTTParty.head(storage_url+ "/#{box_name}/#{destination}",
-                                 headers: { "X-Auth-Token" => auth_token })
-
-      [200, 204].include?(response.code) ? true : false # Adding 200 for Ucloud's way
+      request(:head, box_name, destination, [200, 204])
     end
 
     private
+    def request(method, box_name, destination, success_code = [200])
+      raise NotAuthorized if storage_url.nil?
 
-    private
+      response = HTTParty.send(method, "#{storage_url}/#{box_name}/#{destination}", headers: { "X-Auth-Token" => auth_token })
+      return request(method, box_name, destination, success_code) if response.code == 401 and authorize
+
+      yield response if block_given?
+      success_code.include?(response.code) ? true : false
+    end
 
     #  stolen from http://stackoverflow.com/a/16636012/1802026
     def get_image_extension(local_file_path)

@@ -161,6 +161,30 @@ describe UcloudStorage do
   end
 
   describe "#exist" do
+    it "should retry to upload if authorization failure response" do
+      VCR.use_cassette('storage/v1/auth') do
+        valid_ucloud.authorize
+      end
+
+      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+      box = 'dev'
+      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+      VCR.use_cassette("v1/put_storage_object_04") do
+        valid_ucloud.upload(file_path, box, destination) do |response|
+          response.code.should == 201
+        end
+      end
+
+      valid_ucloud.auth_token += "a"
+
+      VCR.use_cassette("v1/get_storage_object)_04") do
+        valid_ucloud.get(box, destination) do |response|
+          [200, 304].should include(response.code)
+        end.should == true
+      end
+    end
+
     it 'should get updated object' do
       valid_ucloud.authorize
       file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
