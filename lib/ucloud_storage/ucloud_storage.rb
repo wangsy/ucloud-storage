@@ -39,7 +39,7 @@ module UcloudStorage
       raise NotAuthorized if storage_url.nil?
 
       file = File.new(file_path)
-      content_type = get_image_extension(file_path)
+      content_type = get_content_type(file_path)
       upload_blob(file.read, box_name, destination, content_type, &block)
     end
 
@@ -98,19 +98,19 @@ module UcloudStorage
     end
 
     #  stolen from http://stackoverflow.com/a/16636012/1802026
-    def get_image_extension(local_file_path)
+    def get_content_type(local_file_path)
       png = Regexp.new("\x89PNG".force_encoding("binary"))
       jpg = Regexp.new("\xff\xd8\xff\xe0\x00\x10JFIF".force_encoding("binary"))
       jpg2 = Regexp.new("\xff\xd8\xff\xe1(.*){2}Exif".force_encoding("binary"))
       case IO.read(local_file_path, 10)
       when /^GIF8/
-        'gif'
+        'image/gif'
       when /^#{png}/
-        'png'
+        'image/png'
       when /^#{jpg}/
-        'jpg'
+        'image/jpeg'
       when /^#{jpg2}/
-        'jpg'
+        'image/jpeg'
       else
         if local_file_path.end_with? '.txt'
           'text/plain'
