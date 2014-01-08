@@ -6,18 +6,18 @@ module UcloudStorage
   class NotAuthorized < StandardError; end
 
   class UcloudStorage
-    attr_accessor :user, :pass, :storage_url, :auth_token
+    attr_accessor :user, :pass, :type, :storage_url, :auth_token
 
     def initialize(options={})
       @user = options.fetch(:user) { Configuration.user }
       @pass = options.fetch(:pass) { Configuration.pass }
+      @type = options.fetch(:type) { "standard" }
       @authorized = false
     end
 
     def authorize
-      response = HTTParty.get("https://api.ucloudbiz.olleh.com/storage/v1/auth/",
-                              headers: { "X-Storage-User" => user,
-                                         "X-Storage-Pass" => pass })
+      response = HTTParty.get(auth_url, headers: { "X-Storage-User" => user,
+                                                   "X-Storage-Pass" => pass })
 
       yield response if block_given?
 
@@ -75,6 +75,18 @@ module UcloudStorage
     end
 
     private
+
+    def auth_url
+      case type
+      when "standard"
+        "https://api.ucloudbiz.olleh.com/storage/v1/auth"
+      when 'standard-jpn'
+        "https://api.ucloudbiz.olleh.com/storage/v1/authjp"
+      when "lite"
+        "https://api.ucloudbiz.olleh.com/storage/v1/authlite"
+      end
+    end
+
     def request(method, box_name, destination, success_code = [200], &block)
       raise NotAuthorized if storage_url.nil?
 

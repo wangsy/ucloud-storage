@@ -33,6 +33,14 @@ describe UcloudStorage do
                                pass: auth_info["valid_user"]["pass"])
   end
 
+  let(:valid_ucloud_lite) do
+    file = File.open(File.join(File.dirname(__FILE__), "/support/auth_info.yml"))
+    auth_info = YAML.load(file)
+    ucloud = UcloudStorage.new(user: auth_info["valid_user"]["user"],
+                               pass: auth_info["valid_user"]["pass"],
+                               type: 'lite')
+  end
+
   let(:invalid_ucloud) do
     invlaid_ucloud = UcloudStorage.new
     invlaid_ucloud.user = "invalid_user@mintshop.com"
@@ -48,6 +56,16 @@ describe UcloudStorage do
         valid_ucloud.storage_url.should_not be_nil
         valid_ucloud.auth_token.should_not be_nil
         valid_ucloud.is_authorized?.should == true
+      end
+    end
+
+    it 'should be authorize with lite storage' do
+      VCR.use_cassette("storage/v1/authlite") do
+        valid_ucloud_lite.is_authorized?.should_not == true
+        valid_ucloud_lite.authorize.should == true
+        valid_ucloud_lite.storage_url.should_not be_nil
+        valid_ucloud_lite.auth_token.should_not be_nil
+        valid_ucloud_lite.is_authorized?.should == true
       end
     end
 
