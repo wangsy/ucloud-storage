@@ -87,17 +87,17 @@ describe UcloudStorage do
   end
 
   describe "#upload" do
-    it "can upload a file" do
-      VCR.use_cassette('storage/v1/auth') do
-        valid_ucloud.authorize
-      end
-
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
+    it "can upload a file with proper url" do
       VCR.use_cassette("v1/put_storage_object") do
+        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+        box = 'dev_box'
+        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+        valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination).should be_true
+        uploaded_url = "https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_f46e842e-c688-460e-a70b-e6a4d30e9885/dev_box/cropped_images/sample_file.txt"
+        HTTParty.get(uploaded_url).header.code_type.should == Net::HTTPOK
+        valid_ucloud.delete(box, destination)
       end
     end
 
@@ -107,7 +107,7 @@ describe UcloudStorage do
       end
 
       file_path = File.join(File.dirname(__FILE__), "/fixtures/no_sample_file.txt")
-      box = 'dev'
+      box = 'dev_box'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
       expect {
@@ -117,7 +117,7 @@ describe UcloudStorage do
 
     it "should fail to upload without authorization" do
       file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev'
+      box = 'dev_box'
       destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
       expect {
@@ -126,77 +126,69 @@ describe UcloudStorage do
     end
 
     it "should retry to upload if authorization failure response" do
-      VCR.use_cassette('storage/v1/auth') do
-        valid_ucloud.authorize
-      end
-
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-      valid_ucloud.auth_token += "a"
-
       VCR.use_cassette("v1/put_storage_object_with_auth_fail") do
+        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+        box = 'dev_box'
+        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+        valid_ucloud.authorize
+        valid_ucloud.auth_token += "a"
+
         valid_ucloud.upload(file_path, box, destination) do |response|
           response.code.should == 201
         end
+        valid_ucloud.delete(box, destination)
       end
     end
 
     it 'yields response' do
-      VCR.use_cassette('storage/v1/auth') do
-        valid_ucloud.authorize
-      end
-
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
       VCR.use_cassette("v1/put_storage_object") do
+        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+        box = 'dev_box'
+        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+        valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination) do |response|
           response.code.should == 201
         end
+        valid_ucloud.delete(box, destination)
       end
     end
   end
 
   describe "#delete" do
     it 'should delete updated object' do
-      valid_ucloud.authorize
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
-      VCR.use_cassette("v1/put_storage_object_02") do
-        valid_ucloud.upload(file_path, box, destination)
-      end
-
       VCR.use_cassette("v1/delete_storage_object_02") do
+        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+        box = 'dev_box'
+        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
+        valid_ucloud.authorize
+        valid_ucloud.upload(file_path, box, destination)
+
         valid_ucloud.delete(box, destination) do |response|
           response.code.should == 204
         end.should == true
+        uploaded_url = "https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_f46e842e-c688-460e-a70b-e6a4d30e9885/dev_box/cropped_images/sample_file.txt"
+        HTTParty.get(uploaded_url).header.code_type.should == Net::HTTPNotFound
       end
     end
   end
 
   describe "#exist" do
     it "should retry to upload if authorization failure response" do
-      VCR.use_cassette('storage/v1/auth') do
+      VCR.use_cassette("v1/object_exists") do
+        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+        box = 'dev_box'
+        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+
         valid_ucloud.authorize
-      end
-
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
-      VCR.use_cassette("v1/put_storage_object_04") do
         valid_ucloud.upload(file_path, box, destination) do |response|
           response.code.should == 201
         end
-      end
 
-      valid_ucloud.auth_token += "a"
+        valid_ucloud.auth_token += "a"
 
-      VCR.use_cassette("v1/get_storage_object)_04") do
         valid_ucloud.get(box, destination) do |response|
           [200, 304].should include(response.code)
         end.should == true
@@ -204,39 +196,21 @@ describe UcloudStorage do
     end
 
     it 'should get updated object' do
-      valid_ucloud.authorize
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
+      VCR.use_cassette("v1/get_updated_object") do
+        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
+        box = 'dev_box'
+        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
 
-      VCR.use_cassette("v1/put_storage_object_03") do
+        valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination)
-      end
 
-      VCR.use_cassette("v1/get_storage_object") do
         result = false
         valid_ucloud.get(box, destination) do |response|
           result = true
-          #[200, 304].should include(response.code)
+          [200, 304].should include(response.code)
         end
         result.should == true
-      end
-    end
-
-    it 'should get updated object' do
-      valid_ucloud.authorize
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
-      VCR.use_cassette("v1/put_storage_object_03") do
-        valid_ucloud.upload(file_path, box, destination)
-      end
-
-      VCR.use_cassette("v1/get_storage_object") do
-        valid_ucloud.get(box, destination) do |response|
-          [200, 304].should include(response.code)
-        end.should == true
+        valid_ucloud.delete(box, destination)
       end
     end
   end
