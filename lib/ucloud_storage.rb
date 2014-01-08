@@ -6,7 +6,7 @@ require 'forwardable'
 module UcloudStorage
   class << self
     extend Forwardable
-    def_delegators Configuration, :user, :pass, :configure
+    def_delegators Configuration, :user, :pass, :type, :configure
   end
 
 	def self.new(options={})

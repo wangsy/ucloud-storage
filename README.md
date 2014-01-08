@@ -35,6 +35,7 @@ Set default user/pass info
     UcloudStorage.configure do |config|
       config.user = 'email'
       config.pass = 'API KEY'
+      # config.type = 'standard'
     end
 
 ## Response block

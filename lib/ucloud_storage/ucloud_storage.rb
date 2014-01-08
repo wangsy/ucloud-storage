@@ -11,7 +11,7 @@ module UcloudStorage
     def initialize(options={})
       @user = options.fetch(:user) { Configuration.user }
       @pass = options.fetch(:pass) { Configuration.pass }
-      @type = options.fetch(:type) { "standard" }
+      @type = options.fetch(:type) { Configuration.type || 'standard' }
       @authorized = false
     end
 
