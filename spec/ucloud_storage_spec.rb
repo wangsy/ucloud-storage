@@ -48,6 +48,10 @@ describe UcloudStorage do
     invlaid_ucloud
   end
 
+  let(:file_path) { File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt") }
+  let(:box) { 'dev_box' }
+  let(:destination) { 'cropped_images/'+Pathname(file_path).basename.to_s }
+
   describe '#authorize' do
     it "can authorize with valid user/pass" do
       VCR.use_cassette("storage/v1/auth") do
@@ -89,10 +93,6 @@ describe UcloudStorage do
   describe "#upload" do
     it "can upload a file with proper url" do
       VCR.use_cassette("v1/put_storage_object") do
-        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-        box = 'dev_box'
-        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
         valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination).should be_true
         uploaded_url = "https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_f46e842e-c688-460e-a70b-e6a4d30e9885/dev_box/cropped_images/sample_file.txt"
@@ -104,22 +104,14 @@ describe UcloudStorage do
     it "should fail to upload with invalid file path" do
       VCR.use_cassette('storage/v1/auth') do
         valid_ucloud.authorize
+        invalid_file_path = File.join(File.dirname(__FILE__), "/fixtures/no_sample_file.txt")
+        expect {
+          valid_ucloud.upload(invalid_file_path, box, destination)
+        }.to raise_error(Errno::ENOENT)
       end
-
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/no_sample_file.txt")
-      box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
-      expect {
-        valid_ucloud.upload(file_path, box, destination)
-      }.to raise_error(Errno::ENOENT)
     end
 
     it "should fail to upload without authorization" do
-      file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-      box = 'dev_box'
-      destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
       expect {
         valid_ucloud.upload(file_path, box, destination).should be_true
       }.to raise_error(UcloudStorage::NotAuthorized)
@@ -127,10 +119,6 @@ describe UcloudStorage do
 
     it "should retry to upload if authorization failure response" do
       VCR.use_cassette("v1/put_storage_object_with_auth_fail") do
-        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-        box = 'dev_box'
-        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
         valid_ucloud.authorize
         valid_ucloud.auth_token += "a"
 
@@ -143,10 +131,6 @@ describe UcloudStorage do
 
     it 'yields response' do
       VCR.use_cassette("v1/put_storage_object") do
-        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-        box = 'dev_box'
-        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
         valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination) do |response|
           response.code.should == 201
@@ -159,10 +143,6 @@ describe UcloudStorage do
   describe "#delete" do
     it 'should delete updated object' do
       VCR.use_cassette("v1/delete_storage_object_02") do
-        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-        box = 'dev_box'
-        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
         valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination)
 
@@ -178,10 +158,6 @@ describe UcloudStorage do
   describe "#exist" do
     it "should retry to upload if authorization failure response" do
       VCR.use_cassette("v1/object_exists") do
-        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-        box = 'dev_box'
-        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
         valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination) do |response|
           response.code.should == 201
@@ -197,10 +173,6 @@ describe UcloudStorage do
 
     it 'should get updated object' do
       VCR.use_cassette("v1/get_updated_object") do
-        file_path = File.join(File.dirname(__FILE__), "/fixtures/sample_file.txt")
-        box = 'dev_box'
-        destination = 'cropped_images/'+Pathname(file_path).basename.to_s
-
         valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination)
 
