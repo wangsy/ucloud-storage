@@ -91,10 +91,21 @@ describe UcloudStorage do
   end
 
   describe "#upload" do
-    it "can upload a file with proper url" do
+    it "can upload a file" do
       VCR.use_cassette("v1/put_storage_object") do
         valid_ucloud.authorize
         valid_ucloud.upload(file_path, box, destination).should be_true
+        uploaded_url = "https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_f46e842e-c688-460e-a70b-e6a4d30e9885/dev_box/cropped_images/sample_file.txt"
+        HTTParty.get(uploaded_url).header.code_type.should == Net::HTTPOK
+        valid_ucloud.delete(box, destination)
+      end
+    end
+
+    it "can upload a file with proper url" do
+      VCR.use_cassette("v1/put_storage_object_02") do
+        valid_ucloud.authorize
+        destination_with_slash = "/" + destination
+        valid_ucloud.upload(file_path, box, destination_with_slash).should be_true
         uploaded_url = "https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_f46e842e-c688-460e-a70b-e6a4d30e9885/dev_box/cropped_images/sample_file.txt"
         HTTParty.get(uploaded_url).header.code_type.should == Net::HTTPOK
         valid_ucloud.delete(box, destination)

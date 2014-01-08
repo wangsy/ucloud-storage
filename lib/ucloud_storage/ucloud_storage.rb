@@ -46,7 +46,8 @@ module UcloudStorage
     def upload_blob(blob, box_name, destination, content_type, &block)
       raise NotAuthorized if storage_url.nil?
 
-      response = HTTParty.put(storage_url+ "/#{box_name}/#{destination}",
+      target_url = File.join(storage_url, box_name, destination).to_s
+      response = HTTParty.put(target_url,
                               headers: {
                                 "X-Auth-Token" => auth_token,
                                 "Content-Type" => content_type,
@@ -90,7 +91,8 @@ module UcloudStorage
     def request(method, box_name, destination, success_code = [200], &block)
       raise NotAuthorized if storage_url.nil?
 
-      response = HTTParty.send(method, "#{storage_url}/#{box_name}/#{destination}", headers: { "X-Auth-Token" => auth_token })
+      target_url = File.join(storage_url, box_name, destination)
+      response = HTTParty.send(method, target_url, headers: { "X-Auth-Token" => auth_token })
       return request(method, box_name, destination, success_code) if response.code == 401 and authorize
 
       yield response if block_given?
