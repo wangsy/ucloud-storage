@@ -1,3 +1,10 @@
+## v0.0.15
+
+* support ucloud lite authentication
+* fix uploaded to double slashed destination url (http://ucloud.com/box_name//destination)
+* refactor specs
+* remove uploaded file after test
+
 ## v0.0.14
 
 * fix bug - block not called

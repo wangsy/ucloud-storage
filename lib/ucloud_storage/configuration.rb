@@ -5,6 +5,7 @@ module UcloudStorage
     class << self
       attr_accessor :user
       attr_accessor :pass
+      attr_accessor :type
     end
 
     def self.configure
